@@ -6,7 +6,7 @@ namespace :foreman do
       environment_path = "-e #{fetch(:foreman_env)}" if fetch(:foreman_env)
 
       within release_path do
-        sudo :bundle, "exec foreman export upstart /etc/init -a #{fetch(:application)} -u #{host.user} -l #{log_path} -e #{environment_path}"
+        sudo "#{fetch(:foreman_prefix)} foreman export upstart /etc/init -a #{fetch(:application)} -u #{host.user} -l #{log_path} #{environment_path}"
       end
     end
   end
@@ -33,4 +33,10 @@ namespace :foreman do
   end
 
   before 'deploy:publishing', 'foreman:export'
+end
+
+namespace :load do
+  task :defaults do
+    set :foreman_prefix, 'bundle exec'
+  end
 end
