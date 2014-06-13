@@ -7,7 +7,7 @@ namespace :foreman do
       environment_path = "-e #{fetch(:foreman_env)}" if fetch(:foreman_env)
 
       within release_path do
-        sudo "#{fetch(:foreman_prefix)} foreman export upstart /etc/init -a #{fetch(:foreman_application)} -u #{user} -l #{log_path} #{environment_path}"
+        execute fetch(:sudo), "#{fetch(:foreman_prefix)} foreman export upstart /etc/init -a #{fetch(:foreman_application)} -u #{user} -l #{log_path} #{environment_path}"
       end
     end
   end
@@ -15,21 +15,21 @@ namespace :foreman do
   desc 'Start the application services'
   task :start do
     on roles(fetch(:foreman_roles)) do |host|
-      sudo :start, fetch(:foreman_application)
+      execute fetch(:sudo), :start, fetch(:foreman_application)
     end
   end
 
   desc 'Stop the application services'
   task :stop do
     on roles(fetch(:foreman_roles)) do |host|
-      sudo :stop, fetch(:foreman_application)
+      execute fetch(:sudo), :stop, fetch(:foreman_application)
     end
   end
 
   desc 'Restart the application services'
   task :restart do
     on roles(fetch(:foreman_roles)) do |host|
-      sudo :service, "#{fetch(:foreman_application)} start || service #{fetch(:foreman_application)} restart"
+      execute fetch(:sudo), :service, "#{fetch(:foreman_application)} start || service #{fetch(:foreman_application)} restart"
     end
   end
 
@@ -38,6 +38,7 @@ end
 
 namespace :load do
   task :defaults do
+    set :sudo, 'sudo'
     set :foreman_prefix, 'bundle exec'
     set :foreman_roles, %w(app)
     set :foreman_application, -> { fetch(:application) }
